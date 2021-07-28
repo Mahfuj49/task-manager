@@ -1,0 +1,22 @@
+.board {
+  width: 100vw;
+  height: 100vh;
+  padding: 60px;
+  display: flex;
+  align-items: flex-start;
+  overflow: auto;
+}
+
+.addColumnButton {
+  cursor: pointer;
+  width: 260px;
+  height: 40px;
+  padding: 10px;
+  border-radius: 4px;
+  border: none;
+  background-color: #f2f3f4;
+  text-transform: uppercase;
+  font-size: inherit;
+  font-weight: bold;
+  flex-shrink: 0;
+}
