@@ -10,6 +10,10 @@ export default class Board extends Component {
     colNameInput: false,
     // column name value
     colName: null,
+    // dragged card index
+    dragged: null,
+    // column index, card been dragged
+    container: null,
   };
 
   // handle new column button click
@@ -23,7 +27,7 @@ export default class Board extends Component {
   // handle new column name input submit
   handleNIpSubmit = (event) => {
     event.preventDefault();
-    
+
     // get the name of newly added column object
     const name = this.state.colName;
 
@@ -86,6 +90,7 @@ export default class Board extends Component {
     if (description !== null && description.length > 0) {
       const card = {
         description: description,
+        dragging: false,
       };
       column.cards.push(card);
       // after submit make the card description to null
@@ -96,7 +101,55 @@ export default class Board extends Component {
         columns: columns,
       });
     }
+    else {
+      column.cardDescInput = false;
+      this.setState({
+        columns: columns,
+      });
+    }
   };
+
+  // handle card drag over on column
+  handleCdDragOver = (event) => {
+    event.preventDefault();
+  }
+
+  // handle card enters on drop target
+  handleCdDrop = (columnIndex) => {
+    let columns = [...this.state.columns];
+    // card's drop target container
+    let endContainer = [...this.state.columns[columnIndex].cards];
+    // card's previous container index
+    const prvContainerIn = this.state.container;
+    // card's previous container
+    let prvContainer = [...this.state.columns[prvContainerIn].cards];
+    // dragging card's index in previous container
+    const dragged = this.state.dragged;
+    const card = prvContainer[dragged];
+    card.dragging = false;
+    if(columnIndex !== prvContainerIn) prvContainer.splice(dragged, 1);
+    endContainer = [...endContainer, card];
+    columns[columnIndex].cards = endContainer;
+    columns[prvContainerIn].cards = prvContainer;
+    this.setState({
+      columns: columns,
+      dragged: null,
+      container: null,
+    });
+  }
+
+  // handle card drag start
+  handleCdDragStart = (event) => {
+    const columns = [...this.state.columns];
+    const dragged = parseInt(event.target.id);
+    const container = parseInt(event.target.parentNode.id);
+    columns[container].cards[dragged].dragging = true;
+    this.setState({
+      columns: columns,
+      dragged: dragged,
+      container: container,
+    });
+  }
 
   render() {
     const colNameInput = this.state.colNameInput;
@@ -105,29 +158,19 @@ export default class Board extends Component {
       <div className={Classes.board}>
         {columns.map((column, index) => (
           <Column
-            key={column.name}
-            name={column.name}
-            count={column.cards.length}
-            cards={column.cards}
-            cardDescInput={column.cardDescInput}
+            key={`${column.name}${index}`}
+            id={index}
+            column={column}
             onDescIpChange={(event) => this.handleDscIpChange(event, index)}
             onAdCdClick={() => this.handleAdCdClick(index)}
             onDIpSubmit={(event) => this.handleDIpSubmit(event, index)}
+            onCdDragOver={this.handleCdDragOver}
+            onCdDrop={() => this.handleCdDrop(index)}
+            onCdDragStart={this.handleCdDragStart}
           />
         ))}
-        {colNameInput ? (
-          <NameInput
-            onSubmit={this.handleNIpSubmit}
-            onChange={this.handleNIpChange}
-          />
-        ) : (
-          <button
-            className={Classes.addColumnButton}
-            onClick={this.handleColClick}
-          >
-            new column
-          </button>
-        )}
+        {colNameInput ? (<NameInput onSubmit={this.handleNIpSubmit} onChange={this.handleNIpChange} />)
+          : (<button className={Classes.addColumnButton} onClick={this.handleColClick}> new column </button>)}
       </div>
     );
   }

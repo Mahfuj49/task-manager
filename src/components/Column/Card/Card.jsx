@@ -1,9 +1,9 @@
 import React from 'react';
 import Classes from './Card.module.css';
 
-const Card = ({ description }) => {
+const Card = ({ description, onDragStart, dragging, id }) => {
   return (
-    <li className={Classes.card}>{description}</li>
+    <li className={[Classes.card, dragging && Classes.dragging].join(" ")} id={id} draggable={true} onDragStart={onDragStart}>{description}</li>
   );
 };
 
